@@ -1,7 +1,19 @@
 #!/bin/bash
 
+# Check for Consul CA env variables
+consul_ca_parameters=""
+if [ -n "$CONSUL_CACERT" ]; then
+  consul_ca_parameters="--cacert $CONSUL_CACERT"
+fi
+if [ -n "$CONSUL_CLIENT_CERT" ]; then
+  consul_ca_parameters="$consul_ca_parameters --cert $CONSUL_CLIENT_CERT"
+fi
+if [ -n "$CONSUL_CLIENT_KEY" ]; then
+  consul_ca_parameters="$consul_ca_parameters --key $CONSUL_CLIENT_KEY"
+fi
+
 # Wait until Consul can be contacted
-until curl -s -k ${CONSUL_HTTP_ADDR}/v1/status/leader | grep 8300; do
+until curl -s -k $consul_ca_parameters ${CONSUL_HTTP_ADDR}/v1/status/leader | grep 8300; do
   echo "Waiting for Consul to start"
   sleep 1
 done
